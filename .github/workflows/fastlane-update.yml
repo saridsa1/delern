@@ -1,16 +1,17 @@
 name: fastlane update
 
-on:
-  schedule:
-    # Every day at 3:04 UTC: https://crontab.guru/#4_3_*_*_*
-    - cron: "4 3 * * *"
+on: push
+  #schedule:
+  #  # Every day at 3:04 UTC: https://crontab.guru/#4_3_*_*_*
+  #  - cron: "4 3 * * *"
 
 jobs:
   fastlane-update:
     # Do not run on forks.
     if: "github.repository == 'dasfoo/delern'"
     env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Make it an environment variable because it's also used by "hub".
+      GITHUB_TOKEN: ${{ secrets.FASTLANE_UPDATE_GITHUB_TOKEN }}
       UPDATE_BRANCH: automated-update
       # The default SDK directory created by fastlane-plugin-flutter is
       # vendor/flutter under application root, which likely confuses flutter
@@ -38,7 +39,9 @@ jobs:
         run: bundle exec fastlane update
       - name: "Check for changes and create/update PR"
         run: |
-          git config url."https://api:${GITHUB_TOKEN?}@github.com/".insteadOf 'https://github.com/'
+          git config \
+              url."https://odasfoo:${GITHUB_TOKEN?}@github.com/".insteadOf \
+              'https://github.com/'
 
           if [ -n "$(git status --porcelain)" ]; then
             git checkout -b "${UPDATE_BRANCH?}"
